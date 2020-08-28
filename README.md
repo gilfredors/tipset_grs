@@ -15,7 +15,7 @@ General speaking:
 ## Data
 
 #### Data Loader
-Use [Data Loader](data/README.md) to get access to data from english professional football leagues at highest level.
+Use [Data Loader](offline_data/README.md) to get access to data from english professional football leagues at highest level.
 
 #### Data Online
 TBD
