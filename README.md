@@ -11,10 +11,11 @@ Detailed list of python requirements are stored in [requirements.txt](requiremen
 General speaking:
 - Scipy
 - Tensorflow
+- [Requests](git://github.com/requests/requests.git)
 
 ## Data
 
-#### Data Loader
+#### Offline data
 Use [Data Loader](offline_data/README.md) to get access to data from english professional football leagues at highest level.
 
 #### Data Online
