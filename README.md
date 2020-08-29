@@ -1,7 +1,7 @@
 # AI for Tipset
 Machine Learning Classifier based on ANN to generate a weekly proposal for Svenska Spel's Stryktipset.
 
-##Author
+## Author
 Gilfredo Remon Salazar, [e-mail](mailto:gil.remon@gmail.com)
 
 ## Requirements
