@@ -1,4 +1,3 @@
-WARNING: Could not generate requirement for distribution -irtualenvwrapper 4.8.4 (/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages): Parse error at "'-irtuale'": Expected W:(abcd...)
 absl-py==0.9.0
 appdirs==1.4.3
 appnope==0.1.0
@@ -68,7 +67,6 @@ python-dateutil==2.8.1
 pytz==2020.1
 PyYAML==5.3.1
 pyzmq==19.0.1
-requests @ file:///Users/gilfredoremon/CustomProjects/tipset_grs/requests
 requests-oauthlib==1.3.0
 rsa==4.6
 scipy==1.4.1
@@ -92,3 +90,6 @@ wcwidth==0.2.5
 webencodings==0.5.1
 Werkzeug==1.0.1
 wrapt==1.12.1
+requests~=2.24.0
+setuptools~=41.2.0
+nose~=1.3.7
