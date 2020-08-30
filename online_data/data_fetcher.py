@@ -9,12 +9,18 @@ from datetime import date, datetime
 logging.basicConfig(level=logging.DEBUG)
 
 
+class Record(object):
+
+    def __init__(self, name, date):
+        self.name = name
+        self.date = date
+
+
 class DataFetcher(object):
     """ DataFetcher class is the interface between program and external API to request data.
     The class keeps a record of all type of records requested in a config file
     """
 
-    Record = namedtuple('Record', ['name', 'date'])
     URL = 'url'
     FREQUENCY = 'update_frequency'
     DEFAULT_FREQUENCY = 0
@@ -59,10 +65,7 @@ class DataFetcher(object):
             record = next(x for x in self.records if x.name == name)
             return DataFetcher._update_record_if_time_has_passed(record)
         except StopIteration:
-            self.records.append(
-                DataFetcher.Record(
-                    name=name,
-                    date=date.today()))
+            self.records.append(Record(name=name, date=date.today()))
             return True
 
     @staticmethod
@@ -104,6 +107,4 @@ class DataFetcher(object):
         if len(data) != 2:
             logging.error(f'{line} has not the expected format for record log')
         else:
-            return DataFetcher.Record(
-                name=data[0], date=datetime.strptime(
-                    data[1], '%Y-%m-%d').date())
+            return Record(name=data[0], date=datetime.strptime(data[1], '%Y-%m-%d').date())
