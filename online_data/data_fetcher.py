@@ -34,11 +34,11 @@ class DataFetcher(object):
         }
     }
 
-    def __init__(self, log_dir):
+    def __init__(self, log_dir, key):
         self.records = []
         self._headers = {
             'x-rapidapi-host': "api-football-v1.p.rapidapi.com",
-            'x-rapidapi-key': "20f4d7c8b9mshd03c0878beab750p101a30jsn0947b164089d",
+            'x-rapidapi-key': key,
         }
         self.log_dir = log_dir
         if os.path.exists(

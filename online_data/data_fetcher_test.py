@@ -13,15 +13,15 @@ class DataFetcherTest(unittest.TestCase):
 
     @staticmethod
     def test_constructor_of_class():
-        f = DataFetcher('some_dir')
+        f = DataFetcher('some_dir', 'key')
         assert_equal(len(f.records), 0)
 
     def test_add_record_returns_true(self):
-        f = DataFetcher('some_dir')
+        f = DataFetcher('some_dir', 'key')
         assert_true(f.is_record_updated('A'))
 
     def test_record_update_add_same_record_returns_false(self):
-        f = DataFetcher('some_dir')
+        f = DataFetcher('some_dir', 'key')
         f.GET_CONFIG.update({'A': {f.URL: 'a', f.FREQUENCY: 2}})
         assert_true(f.is_record_updated('A'))
         assert_false(f.is_record_updated('A'))
