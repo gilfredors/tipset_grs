@@ -1,19 +1,13 @@
 import json
 import logging
 import os
+import pandas as pd
 import requests
-from collections import namedtuple
+from online_data.api_get_operations import get_frequency, get_url
 from datetime import date, datetime
 
 
 logging.basicConfig(level=logging.DEBUG)
-
-
-class Record(object):
-
-    def __init__(self, name, date):
-        self.name = name
-        self.date = date
 
 
 class DataFetcher(object):
@@ -21,21 +15,16 @@ class DataFetcher(object):
     The class keeps a record of all type of records requested in a config file
     """
 
-    URL = 'url'
-    FREQUENCY = 'update_frequency'
-    DEFAULT_FREQUENCY = 0
     REQUEST_FETCHER_LOG = 'request_record.csv'
     REQUEST_DATA_FILE_NAME_FORMAT = '{name}.json'
-
-    GET_CONFIG = {
-        'countries': {
-            URL: 'https://api-football-v1.p.rapidapi.com/v2/countries',
-            FREQUENCY: 1
-        }
-    }
+    OPERATION_KEY = 'operation'
+    DATE_KEY = 'date'
 
     def __init__(self, log_dir, key):
-        self.records = []
+        self.records = pd.DataFrame(
+            columns=[
+                DataFetcher.OPERATION_KEY,
+                DataFetcher.DATE_KEY])
         self._headers = {
             'x-rapidapi-host': "api-football-v1.p.rapidapi.com",
             'x-rapidapi-key': key,
@@ -47,40 +36,45 @@ class DataFetcher(object):
                 DataFetcher.REQUEST_FETCHER_LOG)):
             self._read_request_log()
 
-    def get(self, name):
-        if name in DataFetcher.GET_CONFIG:
-            if self.is_record_updated(name):
-                self._update_register()
-                data = requests.request(
-                    "GET", DataFetcher.GET_CONFIG[name][DataFetcher.URL], headers=self._headers)
+    def get(self, name, formats=None, params=None):
+        if self.is_record_updated(name):
+            url_key = get_url(name, formats)
+            data = requests.request("GET", url_key, headers=self._headers)
+            result_code = data.json().get('api', {}).get('results', 0)
+            if result_code != 0:
                 self._store_last_request_in_json(data.json(), name)
+                self._update_register()
                 return data.json()
             else:
-                return self._read_last_request_in_json(name)
+                logging.error(
+                    f'{data.json().get("message", "Unknown error response from request")}')
         else:
-            logging.error(f'Operation "get {name}" is not supported')
+            return self._read_last_request_in_json(name)
 
-    def is_record_updated(self, name):
-        try:
-            record = next(x for x in self.records if x.name == name)
-            return DataFetcher._update_record_if_time_has_passed(record)
-        except StopIteration:
-            self.records.append(Record(name=name, date=date.today()))
+    def is_record_updated(self, operation):
+        if self.records.empty or self.records[self.records[self.OPERATION_KEY]
+                                              == operation].empty:
+            self.records = self.records.append(pd.DataFrame(
+                [{self.OPERATION_KEY: operation, self.DATE_KEY: date.today()}]), ignore_index=True)
             return True
+        else:
+            return self._update_record_if_time_has_passed(operation)
 
-    @staticmethod
-    def _update_record_if_time_has_passed(record):
+    def _update_record_if_time_has_passed(self, name):
         time_has_passed = False
-        if (date.today() - record.date).days >= DataFetcher.GET_CONFIG[record.name].get(
-                DataFetcher.FREQUENCY, DataFetcher.DEFAULT_FREQUENCY):
+        record = self.records[self.records[self.OPERATION_KEY] == name]
+        if (date.today() - record.date[0]
+            ).days >= get_frequency(record.operation[0]):
             record.date = date.today()
             time_has_passed = True
         return time_has_passed
 
     def _update_register(self):
-        with open(os.path.join(self.log_dir, DataFetcher.REQUEST_FETCHER_LOG), 'w') as log:
-            for record in self.records:
-                log.write(f'{record.name},{record.date}\n')
+        self.records.to_csv(
+            os.path.join(
+                self.log_dir,
+                DataFetcher.REQUEST_FETCHER_LOG),
+            index=False)
 
     def _store_last_request_in_json(self, data, name):
         with open(os.path.join(self.log_dir, DataFetcher.REQUEST_DATA_FILE_NAME_FORMAT.format(name=name)), 'w') as f:
@@ -91,20 +85,8 @@ class DataFetcher(object):
             self.log_dir,
             DataFetcher.REQUEST_DATA_FILE_NAME_FORMAT.format(
                 name=name))
-        if os.path.exists(json_name):
-            with open(json_name, "r") as read_file:
-                return json.load(read_file)
+        with open(json_name, "r") as read_file:
+            return json.load(read_file)
 
     def _read_request_log(self):
-        with open(os.path.join(self.log_dir, DataFetcher.REQUEST_FETCHER_LOG), 'r') as log:
-            info_lines = log.readlines()
-            self.records = list(
-                map(DataFetcher._read_record_log_line, info_lines))
-
-    @staticmethod
-    def _read_record_log_line(line):
-        data = line.replace('\n', '').split(',')
-        if len(data) != 2:
-            logging.error(f'{line} has not the expected format for record log')
-        else:
-            return Record(name=data[0], date=datetime.strptime(data[1], '%Y-%m-%d').date())
+        self.records = pd.read_csv(DataFetcher.REQUEST_FETCHER_LOG, )
