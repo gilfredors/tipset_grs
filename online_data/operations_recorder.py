@@ -44,17 +44,13 @@ class OperationsRecorder(object):
     def read_last_request(self, name):
         json_name = os.path.join(
             self.record_dir,
-            OperationsRecorder.REQUEST_DATA_FILE_NAME_FORMAT.format(
-                name=name))
+            OperationsRecorder.REQUEST_DATA_FILE_NAME_FORMAT.format(name=name))
         with open(json_name, "r") as read_file:
             return json.load(read_file)
 
     def update_register(self, data, name):
         self.records.to_csv(
-            os.path.join(
-                self.record_dir,
-                self.record_file),
-            index=False)
+            os.path.join(self.record_dir, self.record_file), index=False)
         self._store_data_in_json(data, name)
 
     def _store_data_in_json(self, data, name):
@@ -67,7 +63,8 @@ class OperationsRecorder(object):
         record = self.records[self.records[OPERATION_KEY] == operation]
         date_record = datetime.strptime(record.date.iloc[0], "%Y-%m-%d").date()
         if (date.today() - date_record).days >= frequency:
-            record.date = date.today()
+            self.records.loc[self.records[OPERATION_KEY]
+                             == operation, DATE_KEY] = date.today()
             time_has_passed = True
             self.logger.info(f'Time has passed.')
         else:

@@ -11,11 +11,11 @@ REQUEST_DATA_FILE_NAME_FORMAT = '{name}.json'
 operations = {
     'countries': {
         URL: 'https://api-football-v1.p.rapidapi.com/v2/countries',
-        FREQUENCY: 1
+        FREQUENCY: 7
     },
     'leagues': {
         URL: 'https://api-football-v1.p.rapidapi.com/v2/leagues',
-        FREQUENCY: 1
+        FREQUENCY: 7
     },
     'fixtures_on_date': {
         URL: "https://api-football-v1.p.rapidapi.com/fixtures/date/{}",
